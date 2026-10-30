@@ -158,7 +158,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 
 <div class="wrap" id="app">
   <header class="top">
-    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><!-- VERSION: bump on every update --><span class="ver" id="ver" title="Quiz version">v1.0.0</span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
+    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><!-- VERSION: bump on every update --><span class="ver" id="ver" title="Quiz version">v1.0.1</span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
     <h1>OMVIC Practice Exam</h1>
     <p>Multiple-choice questions on the MVDA, Code of Ethics, CPA and Sale of Goods Act. Every new test draws a fresh set of questions and shuffles the answer order.</p>
   </header>
@@ -393,12 +393,13 @@ document.addEventListener("keydown",e=>{
 const WIDE = window.matchMedia("(min-width:960px)");
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 let fails = 0;
-/* remember the unlock across refreshes, back/forward and new tabs (cleared by the Lock button) */
+/* Stay unlocked only through a refresh of the same tab. Leaving the page (another site, back/forward, a new tab) locks it again. */
 const KEY_NAME = "omvic-k";
-const stores = () => { const out = []; try { out.push(window.localStorage); } catch(_){} try { out.push(window.sessionStorage); } catch(_){} return out; };
-function saveKey(v){ for (const st of stores()) { try { st.setItem(KEY_NAME, v); } catch(_){} } }
-function loadKey(){ for (const st of stores()) { try { const v = st.getItem(KEY_NAME); if (v) return v; } catch(_){} } return null; }
-function clearKey(){ for (const st of stores()) { try { st.removeItem(KEY_NAME); } catch(_){} } }
+function saveKey(v){ try { sessionStorage.setItem(KEY_NAME, v); } catch(_){} }
+function loadKey(){ try { return sessionStorage.getItem(KEY_NAME); } catch(_){ return null; } }
+function clearKey(){ try { sessionStorage.removeItem(KEY_NAME); } catch(_){} try { localStorage.removeItem(KEY_NAME); } catch(_){} }
+function isReload(){ try { const nav = performance.getEntriesByType("navigation")[0]; if (nav) return nav.type === "reload"; } catch(_){} try { return performance.navigation.type === 1; } catch(_){ return false; } }
+function lockNow(){ clearKey(); BANK = []; S = null; clearInterval(tick); renderLock(); }
 async function deriveKey(pw){
   const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2", salt:b64d(VAULT.salt), iterations:VAULT.iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, true, ["decrypt"]);
@@ -441,14 +442,16 @@ async function boot(){
     return;
   }
   try {
-    const s = loadKey();
+    try { localStorage.removeItem(KEY_NAME); } catch(_){}
+    const s = isReload() ? loadKey() : null;
+    if (!s) clearKey();
     if (s) { const key = await crypto.subtle.importKey("raw", b64d(s), "AES-GCM", false, ["decrypt"]); await openVault(key); saveKey(s); unlocked(); return; }
   } catch(_) { clearKey(); }
   renderLock();
 }
-$("#lockbtn").onclick = () => { clearKey(); BANK = []; S = null; clearInterval(tick); renderLock(); };
-/* page restored from the back/forward cache while showing the lock screen: re-check the saved key */
-window.addEventListener("pageshow", e => { if (e.persisted && !BANK.length && loadKey()) boot(); });
+$("#lockbtn").onclick = lockNow;
+/* coming back with the browser's Back/Forward button restores the old page from memory: lock it */
+window.addEventListener("pageshow", e => { if (e.persisted) lockNow(); });
 boot();
 </script>
 
