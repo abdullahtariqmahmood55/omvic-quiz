@@ -85,8 +85,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .qtext{font-size:1.2rem;font-weight:600;line-height:1.45;max-width:62ch}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:9px;padding:12px 14px;width:100%;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-.opt .k{font-family:var(--display);font-weight:700;font-size:1.15rem;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;border:1.5px solid var(--line)}
-.opt span{min-width:0;padding-top:3px}
+.opt .k{font-family:var(--display);font-weight:700;font-size:1.15rem;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;text-align:center;flex-shrink:0;border:1.5px solid var(--line)}
+.opt span:not(.k){min-width:0;padding-top:3px}
 @media (hover:hover){.opt:hover:not(:disabled){border-color:var(--accent)}}
 .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .opt[aria-pressed="true"] .k{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -158,7 +158,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 
 <div class="wrap" id="app">
   <header class="top">
-    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><!-- VERSION: bump on every update --><span class="ver" id="ver" title="Quiz version">v1.0.2</span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
+    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><!-- VERSION: bump on every update --><span class="ver" id="ver" title="Quiz version">v1.0.3</span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
     <h1>OMVIC Practice Exam</h1>
     <p>Multiple-choice questions on the MVDA, Code of Ethics, CPA and Sale of Goods Act. Every new test draws a fresh set of questions and shuffles the answer order.</p>
   </header>
