@@ -135,6 +135,7 @@ details[open] summary{margin-bottom:12px}
 .rv .ans b{font-weight:600}
 footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 .lockbtn{padding:6px 14px;font-size:.85rem}
+.ver{font-family:var(--mono);font-size:.75rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lock{gap:14px}
 .pw{display:flex;gap:8px;flex-wrap:wrap}
 .pw input{flex:1 1 200px;min-width:0;font:inherit;font-size:1.1rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);letter-spacing:.08em}
@@ -157,7 +158,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 
 <div class="wrap" id="app">
   <header class="top">
-    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
+    <div class="row"><span class="eyebrow">Ontario · Automotive Certification · 2026 manual</span><span class="spacer"></span><!-- VERSION: bump on every update --><span class="ver" id="ver" title="Quiz version">v1.0.0</span><button class="btn ghost lockbtn" id="lockbtn" type="button" hidden>Lock</button></div>
     <h1>OMVIC Practice Exam</h1>
     <p>Multiple-choice questions on the MVDA, Code of Ethics, CPA and Sale of Goods Act. Every new test draws a fresh set of questions and shuffles the answer order.</p>
   </header>
