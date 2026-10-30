@@ -392,6 +392,12 @@ document.addEventListener("keydown",e=>{
 const WIDE = window.matchMedia("(min-width:960px)");
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 let fails = 0;
+/* remember the unlock across refreshes, back/forward and new tabs (cleared by the Lock button) */
+const KEY_NAME = "omvic-k";
+const stores = () => { const out = []; try { out.push(window.localStorage); } catch(_){} try { out.push(window.sessionStorage); } catch(_){} return out; };
+function saveKey(v){ for (const st of stores()) { try { st.setItem(KEY_NAME, v); } catch(_){} } }
+function loadKey(){ for (const st of stores()) { try { const v = st.getItem(KEY_NAME); if (v) return v; } catch(_){} } return null; }
+function clearKey(){ for (const st of stores()) { try { st.removeItem(KEY_NAME); } catch(_){} } }
 async function deriveKey(pw){
   const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2", salt:b64d(VAULT.salt), iterations:VAULT.iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, true, ["decrypt"]);
@@ -419,7 +425,7 @@ function renderLock(msg){
     try {
       const key = await deriveKey(pw.value);
       await openVault(key);
-      try { const raw = await crypto.subtle.exportKey("raw", key); sessionStorage.setItem("omvic-k", btoa(String.fromCharCode(...new Uint8Array(raw)))); } catch(_){}
+      try { const raw = await crypto.subtle.exportKey("raw", key); saveKey(btoa(String.fromCharCode(...new Uint8Array(raw)))); } catch(_){}
       fails = 0; unlocked();
     } catch(_) {
       fails++;
@@ -434,12 +440,14 @@ async function boot(){
     return;
   }
   try {
-    const s = sessionStorage.getItem("omvic-k");
-    if (s) { const key = await crypto.subtle.importKey("raw", b64d(s), "AES-GCM", false, ["decrypt"]); await openVault(key); unlocked(); return; }
-  } catch(_) { try { sessionStorage.removeItem("omvic-k"); } catch(_){} }
+    const s = loadKey();
+    if (s) { const key = await crypto.subtle.importKey("raw", b64d(s), "AES-GCM", false, ["decrypt"]); await openVault(key); saveKey(s); unlocked(); return; }
+  } catch(_) { clearKey(); }
   renderLock();
 }
-$("#lockbtn").onclick = () => { try { sessionStorage.removeItem("omvic-k"); } catch(_){} BANK = []; S = null; clearInterval(tick); renderLock(); };
+$("#lockbtn").onclick = () => { clearKey(); BANK = []; S = null; clearInterval(tick); renderLock(); };
+/* page restored from the back/forward cache while showing the lock screen: re-check the saved key */
+window.addEventListener("pageshow", e => { if (e.persisted && !BANK.length && loadKey()) boot(); });
 boot();
 </script>
 
